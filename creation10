@@ -1,0 +1,41 @@
+class Sprite{
+float x;
+float y;
+float dx;
+float dy;
+
+void update(){
+x += dx;
+y += dy;
+  }
+}
+
+class spaceship extends Sprite{
+color fillColor;
+void render(){
+pushMatrix();
+  noStroke();
+  fill(fillColor);
+  rect(x,y,50,50);
+popMatrix();  
+  }
+  
+  
+}
+
+spaceship ship = new spaceship();
+
+void setup(){
+size(500,500);
+ship.x = 50;
+ship.y = 50;
+ship.dx = random(1.2);
+ship.dy = (2.5);
+ship.fillColor = color (random(255),random(255),random(255)); 
+}
+
+void draw(){
+  background(200);
+  ship.update();
+  ship.render();
+}
