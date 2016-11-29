@@ -1,0 +1,57 @@
+//control variables
+//0:initial variable
+//1:game screen
+//2:game over screen
+int ballX, ballY;
+int ballSize =20;
+int ballColor = color(0);
+
+int gameScreen =0;
+
+void setup(){
+size(500,500);
+ballX=width/4;
+ballY=height/5;
+}
+
+void draw(){
+if(gameScreen==0){
+  initScreen();
+} else if(gameScreen==1){
+  gameScreen();
+} else if (gameScreen==2){
+  gameOverScreen();
+  }
+}
+
+void initScreen(){
+// initial
+background(0);
+textalign(CENTER);
+text("click to start", height/2, width/2);
+}
+
+void gameScreen(){
+// gamescreen
+background(255);
+drawBall():
+}
+
+void drawBall(){
+fill(ballcolor);
+ellipse(ballX,ballY,ballSize,ballSize);
+}
+
+void gameOverScreen(){
+//game over
+}
+
+public void mousePressed(){
+if(gameScreen==0){
+  startGame();
+  }
+}
+
+void startGame(){
+gameScreen=1;
+}
