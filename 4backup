@@ -1,0 +1,347 @@
+
+int rows = 7; //Number of bricks per row
+int columns = 7; //Number of columns
+int total = rows * columns; //Total number of bricks
+int score = 0; //How many bricks have been hit by the player
+int gameScore = 0; //The player's score which displays on the screen.
+int lives = 3; //lives
+
+Paddle p1 = new Paddle(); //initialize paddle (it is called p1, b/c paddlle1 looks weird when it's typed)
+Ball ball1 = new Ball(); //initialize ball (named ball1 for the same reason as above)
+Brick[] box = new Brick[total]; //Initialize the array that will hold all the bricks
+
+void setup()
+{
+  size(600, 600);
+  background(0);
+  smooth();
+
+  //Setup array of all bricks on screen
+  for (int i = 0; i < rows; i++)
+  {
+    for (int j = 0; j< columns; j++)
+    {
+      box[i*rows + j] = new Brick((i+1) *width/(rows + 2), (j+1) * 50); //places all the bricks into the array, properly labelled.
+    }
+  }
+}
+
+
+void draw()
+{
+  background(0);
+
+  //array of bricks
+  for (int i = 0; i<total; i++)
+  {
+    box[i].update();
+  }
+
+  //draw sprite
+  p1.update();
+  ball1.update();
+
+
+  //BALL AND PADDLE/WALL INTERACTIONS
+
+
+  //Ball hits left side of paddle
+  if (ball1.y == p1.y && ball1.x > p1.x && ball1.x <= p1.x + (p1.w / 2) )
+  {
+    ball1.goleft();
+    ball1.changeY();
+  }
+
+  //Ball hits right side of paddle
+  if (ball1.y == p1.y && ball1.x > p1.x + (p1.w/2) && ball1.x <= p1.x + p1.w )
+  {
+    ball1.goright();
+    ball1.changeY();
+  }
+
+  //If the ball hits the RIGHT wall, go in same y direction, but go left  
+  if (ball1.x + ball1.D / 2 >= width)
+  {
+    ball1.goleft();
+  }
+
+  //If the ball hits the LEFT wall, go in same y direction, but go right
+  if (ball1.x - ball1.D / 2 <= 0)
+  {
+    ball1.goright();
+  }
+
+  //If the ball hits the ceiling, go down in a different direction
+  if (ball1.y - ball1.D / 2 <= 0)
+  {
+    ball1.changeY();
+  }
+
+
+  //BALL,  BRICK
+
+  for (int i = 0; i < total; i ++)
+  {
+    if (ball1.y - ball1. D / 2 <= box[i].y + box[i].h &&  ball1.y - ball1.D/2 >= box[i].y && ball1.x >= box[i].x && ball1.x <= box[i].x + box[i].w  && box[i].hit == false )
+    {
+      ball1.changeY();
+      box[i].gotHit();
+      score += 1;
+      gameScore += 10;
+   } 
+
+    if (ball1.y + ball1.D / 2 >= box[i].y && ball1.y - ball1.D /2 <= box[i].y + box[i].h/2 && ball1.x >= box[i].x && ball1.x <= box[i].x + box[i].w && box[i].hit == false ) 
+    {
+      ball1.changeY();
+      box[i].gotHit();
+      score += 1;
+      gameScore += 10;
+    }
+
+    if (ball1.x + ball1.D / 2 >= box[i].x && ball1.x + ball1.D / 2 <= box[i].x + box[i].w / 2 && ball1.y >= box[i].y && ball1.y <= box[i].y + box[i].h  && box[i].hit == false)
+    {
+      ball1.goleft();
+      box[i].gotHit();
+      score += 1;
+      gameScore += 10;
+    }
+
+    //if ball hits the right of the brick, ball switches to the left, and moves in same direction, increment score
+    if (ball1.x - ball1.D/2 <= box[i].x + box[i].w && ball1.x +ball1.D / 2 >= box[i].x + box[i].w / 2 && ball1.y >= box[i].y && ball1.y <= box[i].y + box[i].h  && box[i].hit == false)
+    {
+      ball1.goright();
+      box[i].gotHit();
+      score += 1;
+      gameScore += 10;
+    }
+  }
+
+  if (ball1.y > height)
+  {
+    ball1.reset();
+    lives -= 1;
+  }
+
+
+  textSize(32);
+  text(gameScore, 10, 30);
+  textSize(18);
+  text("LIVES: ", 10, 570);
+  text(lives, 70, 570); 
+  if ((score == total || lives <= 0) && mousePressed){
+    resetGame();
+  } 
+  if (score == total)
+  {
+    gameWin();
+  }
+
+  //If no more lives are left, game ends
+  if (lives <= 0)
+  {
+    gameLose();
+  }
+}
+
+//Function that displays the game screen after the player loses.
+void gameLose()
+{
+  //Says "Game over", displays score, max streak, and allows user to click screen to play again. 
+  background(0);
+  textSize(32);
+  text("GAME OVER", 100, 200);
+  text("Score: ", 100, 300);
+  text(gameScore, 300, 300);
+  text("Click mouse to play again!", 100, 500);
+
+  ball1.x = -10;
+  ball1.y = -10;
+  ball1.vx = 0;
+  ball1.vy = 0;
+
+}
+
+
+
+
+
+//Function that displays the gameOver screen
+void gameWin()
+{ 
+
+  //Says "You win!", displays score, max streak, and allows user to click screen to play again. 
+  background(0);
+  textSize(32);
+  text("YOU WIN!", 100, 200);
+  text("Score: ", 100, 300);
+  text(gameScore, 300, 300);
+  text("Click mouse to play again!", 100, 500);
+  
+  //The game is still technically playing when this screen is brought up, 
+  //so these steps help to isolate the ball and missiles.
+  ball1.x = -10;
+  ball1.y = -10;
+  ball1.vx = 0;
+  ball1.vy = 0;
+}
+
+
+//Function that Resets the game
+void resetGame()
+{
+
+  //Setup array of all bricks on screen
+  for (int i = 0; i < rows; i++)
+  {
+    for (int j = 0; j< columns; j++)
+    {
+      box[i*rows + j] = new Brick((i+1) *width/(rows + 2), (j+1) * 50);
+    }
+
+    //Reset all the score values
+    score = 0;
+    gameScore = 0;
+    lives = 3;
+
+  }
+
+  //Reset the ball as well
+  ball1.reset();
+}
+
+
+//PADDLE CLASS
+class Paddle
+{
+  float x; //paddle x
+  float y; //padlle y
+  float w; //paddle width
+  float h; //paddle height
+  float rpcolor; //paddle red val
+
+
+  //Paddle constructor
+  Paddle()
+  {
+    x = width/2;
+    y = 500;
+    w = 100;
+    h = 10;
+    rpcolor=255;
+
+  }
+
+  void update()
+  {
+    //Paddle follows the mouse
+    x = mouseX;    
+
+    //Draw paddle
+    fill(rpcolor);
+    rect(x, y, w, h);
+  }
+}
+
+
+//BALL CLASS
+class Ball
+{
+
+  float x;  //ball x
+  float y; //ball y
+  float vx; //ball velocity in x
+  float vy; //ball velocity in y 
+  float D; //ball diameter
+
+  //Ball constructor
+  Ball()
+  {
+    x = 300;
+    y = 10;
+    vx = 0; //Initially, ball just falls straight down
+    vy = 4; 
+    D = 10;
+  }
+
+  //Update the ball
+  void update()
+  {
+    noStroke();
+    fill(255);
+    ellipse(x, y, D, D);
+
+    y += vy; //increment y
+    x += vx; //increment x
+  }
+
+  //Ball goes left
+  void goleft()
+  {
+    vx = -4; //decrement x
+  }
+
+  //Ball goes right
+  void goright()
+  {
+    vx = 4; //increment x
+  }
+
+  //Ball changes in y direction
+  void changeY()
+  {
+    vy *= -1; 
+  }
+
+  //If ball goes below paddle, reset
+  void reset()
+  {
+    x = 300;
+    y = 400;
+    vx = 0;
+    vy = 4;
+  }
+}
+
+
+//BRICK CLASS
+class Brick
+{
+  float x; //brick x
+  float y; //brick y
+  float w; //brick width
+  float h; //brich height
+  float rcolor;
+
+  boolean hit; //whether or not the brick has been hit
+
+
+    Brick(float x0, float y0)
+  {
+    x = x0;
+    y = y0;
+
+    rcolor = 150;
+
+    w = 50; //brick width
+    h = 25; //brick height
+
+    hit = false; //brick is initially not hit
+  }
+
+  //Draws the brick
+  void update()
+  {
+    noStroke();
+    fill(rcolor,rcolor*(255),rcolor);
+    rect(x, y, w, h);
+  }
+
+  //What happens to the brick once it gets hit
+  void gotHit()
+  {
+    hit = true; //brick recognizes that it has been hit
+    rcolor = 0;
+
+    rect(x, y, w, h);
+  }
+}
